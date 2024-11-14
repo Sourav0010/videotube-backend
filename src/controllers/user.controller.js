@@ -3,6 +3,8 @@ import { ApiResponse } from '../utils/ApiResponse.util.js'
 import { ApiError } from '../utils/ApiError.util.js'
 import { User } from '../models/user.model.js'
 import FileUpload from '../utils/FileUpload.util.js'
+import jwt from 'jsonwebtoken'
+import mongoose from 'mongoose'
 
 const generateRefreshAndAccessToken = async (userId) => {
     try {
@@ -123,4 +125,98 @@ const logoutUser = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, {}, 'User logged out'))
 })
 
-export { createUser, loginUser, getCurrentUser, logoutUser }
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const token =
+        req.cookies.refreshToken || req.headers.authorization.split(' ')[1]
+    if (!token) {
+        throw new ApiError(401, 'Unauthorized')
+    }
+
+    const user = await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
+
+    const { refreshToken, accessToken } = await generateRefreshAndAccessToken(
+        user._id
+    )
+    const newUser = await User.findById(user._id)
+    newUser.refreshToken = refreshToken
+    await newUser.save({ validateBeforeSave: false })
+
+    return res
+        .status(200)
+        .cookie('refreshToken', refreshToken)
+        .cookie('accessToken', accessToken)
+        .json(new ApiResponse(200, {}, 'Token refreshed successfully'))
+})
+
+const getSubscribersCount = asyncHandler(async (req, res) => {
+    if (!req.body.channelId) throw new ApiError(400, 'Channel id is required')
+
+    const subscriber = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.body.channelId),
+            },
+        },
+        {
+            $lookup: {
+                from: 'subscriptions',
+                localField: '_id',
+                foreignField: 'channel',
+                as: 'subscribers',
+            },
+        },
+        {
+            $lookup: {
+                from: 'subscribers',
+                localField: '_id',
+                foreignField: 'subscriber',
+                as: 'subscribed',
+            },
+        },
+        {
+            $addFields: {
+                subscriberCount: { $size: '$subscribers' },
+                subscribedCount: { $size: '$subscribed' },
+                isSubscribed: {
+                    $cond: {
+                        if: {
+                            $in: [
+                                new mongoose.Types.ObjectId(req.user._id),
+                                '$subscribers.subscriber',
+                            ],
+                        },
+                        then: true,
+                        else: false,
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                subscriberCount: 1,
+                subscribedCount: 1,
+                isSubscribed: 1,
+                username: 1,
+                fullName: 1,
+                email: 1,
+            },
+        },
+    ])
+
+    if (!subscriber) {
+        throw new ApiError(404, 'User not found')
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, subscriber[0], 'Subscribers count found'))
+})
+
+export {
+    createUser,
+    loginUser,
+    getCurrentUser,
+    logoutUser,
+    refreshAccessToken,
+    getSubscribersCount,
+}
