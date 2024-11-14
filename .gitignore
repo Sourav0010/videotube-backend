@@ -116,5 +116,5 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-
+MongoDb_CheetSheet.md
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
