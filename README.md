@@ -107,7 +107,7 @@ Here’s an overview of the main database models:
 
     ```bash
     git clone https://github.com/Sourav0010/videotube-backend.git
-    cd your-repo
+    cd youtube-backend
     ```
 
 2. Install dependencies:
@@ -123,7 +123,7 @@ Here’s an overview of the main database models:
 
 4. Start the server:
     ```bash
-    npm start
+    npm run dev
     ```
 
 ## API Endpoints
