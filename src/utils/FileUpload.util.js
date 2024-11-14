@@ -10,10 +10,12 @@ cloudinary.config({
 async function FileUpload(localFilePath) {
     try {
         if (!localFilePath) throw new Error('File path not provided')
-        const { url } = await cloudinary.uploader.upload(localFilePath)
+        const fileData = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: 'auto',
+        })
         fs.unlinkSync(localFilePath)
         console.log('File uploaded successfully')
-        return url
+        return fileData
     } catch (error) {
         console.error('Error uploading file', error)
         fs.unlinkSync(localFilePath)

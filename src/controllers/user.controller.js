@@ -51,8 +51,8 @@ const createUser = asyncHandler(async (req, res) => {
         email,
         password,
         fullName,
-        avatar: avatarUrl,
-        coverImage: coverImageUrl || '',
+        avatar: avatarUrl?.url,
+        coverImage: coverImageUrl?.url || '',
     })
 
     if (!newUser) {
@@ -212,6 +212,8 @@ const getSubscribersCount = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, subscriber[0], 'Subscribers count found'))
 })
 
+const getUserWatchHistory = asyncHandler(async (req, res) => {})
+
 export {
     createUser,
     loginUser,
@@ -219,4 +221,5 @@ export {
     logoutUser,
     refreshAccessToken,
     getSubscribersCount,
+    getUserWatchHistory,
 }
