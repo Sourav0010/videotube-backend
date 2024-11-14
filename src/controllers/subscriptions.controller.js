@@ -38,11 +38,110 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const { channelId } = req.body
+
+    if (!channelId) throw new ApiError(400, 'Channel ID is required')
+
+    const subscribers = await Subscription.aggregate([
+        {
+            $match: {
+                channel: new mongoose.Types.ObjectId(channelId),
+            },
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'subscriber',
+                foreignField: '_id',
+                as: 'subscribers',
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            fullName: 1,
+                            email: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                subscriber: {
+                    $arrayElemAt: ['$subscribers', 0],
+                },
+            },
+        },
+        {
+            $project: {
+                subscribers: 1,
+            },
+        },
+    ])
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { subscribers },
+                'Subscribers fetched successfully'
+            )
+        )
 })
 
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.body
+    const user = req.body.user
+
+    if (!subscriberId) throw new ApiError(400, 'Subscriber ID is required')
+
+    const channels = await Subscription.aggregate([
+        {
+            $match: {
+                subscriber: new mongoose.Types.ObjectId(user._id),
+            },
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'channel',
+                foreignField: '_id',
+                as: 'channels',
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            fullName: 1,
+                            email: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                channel: {
+                    $arrayElemAt: ['$channels', 0],
+                },
+            },
+        },
+        {
+            $project: {
+                channels: 1,
+            },
+        },
+    ])
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { channels },
+                'Subscribed channels fetched successfully'
+            )
+        )
 })
 
 export { toggleSubscription, getUserChannelSubscribers, getSubscribedChannels }
