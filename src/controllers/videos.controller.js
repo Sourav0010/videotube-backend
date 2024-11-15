@@ -9,6 +9,40 @@ import FileUpload from '../utils/FileUpload.util.js'
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+
+    const videos = await Video.find({
+        $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { description: { $regex: query, $options: 'i' } },
+        ],
+        owner: new mongoose.Types.ObjectId(userId),
+    })
+        .sort({
+            [sortBy]: sortType === 'asc' ? 1 : -1,
+        })
+        .skip((page - 1) * limit)
+        .limit(limit)
+
+    const totalVideoCount = await Video.countDocuments({
+        $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { description: { $regex: query, $options: 'i' } },
+        ],
+        owner: new mongoose.Types.ObjectId(userId),
+    })
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                videos,
+                totalVideoCount,
+                totalPages: Math.ceil(totalVideoCount / limit),
+                currentPage: page,
+            },
+            'Videos fetched successfully'
+        )
+    )
 }) // TODO: Implement pagination, sorting, and filtering
 
 const publishAVideo = asyncHandler(async (req, res) => {
