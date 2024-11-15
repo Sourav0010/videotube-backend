@@ -148,7 +148,7 @@ Here’s an overview of the main database models:
 -   `PUT /api/playlists/:id`: Update a playlist
 -   `DELETE /api/playlists/:id`: Delete a playlist
 
-... (Add other endpoints as needed)
+---
 
 ## Technologies Used
 
