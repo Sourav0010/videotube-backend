@@ -1,10 +1,10 @@
 import mongoose, { isValidObjectId } from 'mongoose'
 import { Video } from '../models/videos.model.js'
-import { User } from '../models/user.model.js'
 import { ApiError } from '../utils/ApiError.util.js'
 import { ApiResponse } from '../utils/ApiResponse.util.js'
 import { asyncHandler } from '../utils/AsyncHandler.util.js'
 import FileUpload from '../utils/FileUpload.util.js'
+import { DeleteFile } from '../utils/DeleteFile.util.js'
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
@@ -109,6 +109,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
     const deletedVideo = await Video.findByIdAndDelete(videoId)
 
     if (!deletedVideo) throw new ApiError(500, 'Error deleting video')
+
+    await DeleteFile(deletedVideo.videoFile)
+    if (deletedVideo.thumbnail) await DeleteFile(deletedVideo.thumbnail)
 
     return res
         .status(200)

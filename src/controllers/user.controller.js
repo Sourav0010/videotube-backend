@@ -5,6 +5,7 @@ import { User } from '../models/user.model.js'
 import FileUpload from '../utils/FileUpload.util.js'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
+import { DeleteFile } from '../utils/DeleteFile.util.js'
 
 const generateRefreshAndAccessToken = async (userId) => {
     try {
@@ -210,6 +211,23 @@ const getSubscribersCount = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new ApiResponse(200, subscriber[0], 'Subscribers count found'))
+})
+
+const deleteUser = asyncHandler(async (req, res) => {
+    const data = req.body.user
+    const user = await User.findByIdAndDelete(req.user._id)
+
+    if (!user) {
+        throw new ApiError(404, 'User not found')
+    }
+
+    await DeleteFile(data.avatar)
+    if (data.coverImage) await DeleteFile(data.coverImage)
+
+    res.status(200)
+        .clearCookie('refreshToken')
+        .clearCookie('accessToken')
+        .json(new ApiResponse(200, {}, 'User deleted successfully'))
 })
 
 const getUserWatchHistory = asyncHandler(async (req, res) => {})
