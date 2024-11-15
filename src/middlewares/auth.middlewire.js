@@ -6,13 +6,12 @@ export const auth = async (req, res, next) => {
     try {
         const token = req.cookies.accessToken
         if (!token) throw new ApiError(401, 'Unauthorized')
-        const user = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-        if (!user) throw new ApiError(401, 'Unauthorized')
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
-        const newUser = await User.findById(user._id).select(
+        const user = await User.findById(decodedToken._id).select(
             '-password -refreshToken'
         )
-        req.user = newUser
+        req.user = user
         next()
     } catch (error) {
         return res.status(401).json(new ApiError(401, 'Unauthorized'))

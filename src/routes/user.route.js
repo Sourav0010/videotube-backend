@@ -6,6 +6,7 @@ import {
     logoutUser,
     refreshAccessToken,
     getSubscribersCount,
+    deleteUser,
 } from '../controllers/user.controller.js'
 import { upload } from '../middlewares/multer.middlewire.js'
 import { auth } from '../middlewares/auth.middlewire.js'
@@ -25,6 +26,7 @@ route.post('/login', loginUser)
 route.post('/getuser', auth, getCurrentUser)
 route.post('/logout', auth, logoutUser)
 route.post('/refresh-token', refreshAccessToken)
-route.post('/channel', auth, getSubscribersCount)
+route.route('/c/:channelId').get(auth, getSubscribersCount)
+route.post('/delete-user', auth, deleteUser)
 
 export default route

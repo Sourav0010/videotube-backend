@@ -4,6 +4,7 @@ import { ApiError } from '../utils/ApiError.util.js'
 import { ApiResponse } from '../utils/ApiResponse.util.js'
 import { asyncHandler } from '../utils/AsyncHandler.util.js'
 import FileUpload from '../utils/FileUpload.util.js'
+import { DeleteVideoFile } from '../utils/DeleteVideoFile.util.js'
 import { DeleteFile } from '../utils/DeleteFile.util.js'
 
 const getAllVideos = asyncHandler(async (req, res) => {
@@ -43,7 +44,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
             'Videos fetched successfully'
         )
     )
-}) // TODO: Implement pagination, sorting, and filtering
+})
 
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body
@@ -51,10 +52,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
     if (!title && !description)
         throw new ApiError(400, 'Title and Description are required')
 
-    if (!req.file && !req.file?.path)
-        throw new ApiError(400, 'Video is required')
+    const videoFilePath = req?.files?.videoFile[0]?.path
+    if (!videoFilePath) throw new ApiError(400, 'Video is required')
 
-    const filePath = await FileUpload(req.file.path)
+    const filePath = await FileUpload(videoFilePath)
     if (!filePath && !filePath.url)
         throw new ApiError(500, 'Error uploading video')
 
@@ -65,7 +66,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
         title,
         description,
         duration: filePath.duration || 0,
-        views: 0,
+        views: filePath.views || 0,
         isPublished: false,
     })
 
@@ -78,9 +79,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    if (!isValidObjectId(videoId)) throw new ApiError(400, 'Invalid video ID')
     //TODO: get video by id
 
-    if (videoId) throw new ApiError(400, 'Video ID is required')
     const video = await Video.findById(videoId)
     if (!video) throw new ApiError(404, 'Video not found')
     return res
@@ -90,38 +91,35 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-
     //TODO: update video details like title, description, thumbnail
-}) //TODO: Implement updating video details
+})
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
-    if (!videoId) throw new ApiError(400, 'Video ID is required')
+    if (!isValidObjectId(videoId))
+        throw new ApiError(400, 'Video ID is required')
 
     const video = await Video.findById(videoId)
 
     if (!video) throw new ApiError(404, 'Video not found')
 
+    await DeleteVideoFile(video.videoFile.split('/').pop().split('.')[0])
+    if (video.thumbnail)
+        await DeleteFile(video.thumbnail.split('/').pop().split('.')[0])
+
     if (video.owner.toString() !== req.user._id.toString())
         throw new ApiError(403, 'You are not authorized to delete this video')
 
-    const deletedVideo = await Video.findByIdAndDelete(videoId)
-
-    if (!deletedVideo) throw new ApiError(500, 'Error deleting video')
-
-    await DeleteFile(deletedVideo.videoFile)
-    if (deletedVideo.thumbnail) await DeleteFile(deletedVideo.thumbnail)
+    await Video.findByIdAndDelete(videoId)
 
     return res
         .status(200)
-        .json(new ApiResponse(200, deletedVideo, 'Video deleted successfully'))
+        .json(new ApiResponse(200, {}, 'Video deleted successfully'))
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-
-    if (!videoId) throw new ApiError(400, 'Video ID is required')
 
     const video = await Video.findById(videoId)
 

@@ -14,7 +14,6 @@ async function FileUpload(localFilePath) {
             resource_type: 'auto',
         })
         fs.unlinkSync(localFilePath)
-        console.log('File uploaded successfully')
         return fileData
     } catch (error) {
         console.error('Error uploading file', error)

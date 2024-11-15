@@ -82,7 +82,7 @@ const loginUser = asyncHandler(async (req, res) => {
     // check if the user exist in database or not
     const user = await User.findOne({ email })
     if (!user) {
-        return res.status(400).json(new ApiError(400, 'User not found'))
+        throw new ApiError(400, 'User not found')
     }
 
     // verify the password
@@ -150,12 +150,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 const getSubscribersCount = asyncHandler(async (req, res) => {
-    if (!req.body.channelId) throw new ApiError(400, 'Channel id is required')
+    const { channelId } = req.params
+    if (!channelId) throw new ApiError(400, 'Channel id is required')
 
     const subscriber = await User.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(req.body.channelId),
+                _id: new mongoose.Types.ObjectId(channelId),
             },
         },
         {
@@ -210,19 +211,23 @@ const getSubscribersCount = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, subscriber[0], 'Subscribers count found'))
+        .json(new ApiResponse(200, subscriber, 'Subscribers count found'))
 })
 
 const deleteUser = asyncHandler(async (req, res) => {
-    const data = req.body.user
+    const data = req.user
+
+    await DeleteFile(data.avatar.split('/').pop().split('.')[0])
+    if (data.coverImage)
+        await DeleteFile(data.coverImage.split('/').pop().split('.')[0])
+
     const user = await User.findByIdAndDelete(req.user._id)
 
     if (!user) {
         throw new ApiError(404, 'User not found')
     }
 
-    await DeleteFile(data.avatar)
-    if (data.coverImage) await DeleteFile(data.coverImage)
+    // console.log(req.user)
 
     res.status(200)
         .clearCookie('refreshToken')
@@ -240,4 +245,5 @@ export {
     refreshAccessToken,
     getSubscribersCount,
     getUserWatchHistory,
+    deleteUser,
 }
