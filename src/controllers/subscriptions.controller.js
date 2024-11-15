@@ -2,9 +2,10 @@ import { asyncHandler } from '../utils/AsyncHandler.util.js'
 import { Subscription } from '../models/subscriptions.model.js'
 import { ApiResponse } from '../utils/ApiResponse.util.js'
 import { ApiError } from '../utils/ApiError.util.js'
+import mongoose, { isValidObjectId } from 'mongoose'
 
 const toggleSubscription = asyncHandler(async (req, res) => {
-    const { channelId } = req.body
+    const { channelId } = req.params
 
     if (!channelId) throw new ApiError(400, 'Channel ID is required')
 
@@ -37,7 +38,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
-    const { channelId } = req.body
+    const { channelId } = req.params
 
     if (!channelId) throw new ApiError(400, 'Channel ID is required')
 
@@ -74,6 +75,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
         {
             $project: {
                 subscribers: 1,
+                _id: 0,
             },
         },
     ])
@@ -83,7 +85,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                { subscribers },
+                subscribers,
                 'Subscribers fetched successfully'
             )
         )
@@ -91,15 +93,15 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
-    const { subscriberId } = req.body
-    const user = req.body.user
+    const { subscriberId } = req.params
 
-    if (!subscriberId) throw new ApiError(400, 'Subscriber ID is required')
+    if (!isValidObjectId(subscriberId))
+        throw new ApiError(400, 'Subscriber ID is required')
 
     const channels = await Subscription.aggregate([
         {
             $match: {
-                subscriber: new mongoose.Types.ObjectId(user._id),
+                subscriber: new mongoose.Types.ObjectId(subscriberId),
             },
         },
         {
@@ -121,9 +123,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
         },
         {
             $addFields: {
-                channel: {
-                    $arrayElemAt: ['$channels', 0],
-                },
+                channel: '$channels',
             },
         },
         {

@@ -130,23 +130,26 @@ Here’s an overview of the main database models:
 
 ### Users
 
--   `POST /api/users`: Register a new user
--   `POST /api/users/login`: Login an existing user
--   `GET /api/users/:id`: Get user details
+-   `POST /api/v1/users/signup`: Register a new user
+-   `POST /api/v1/users/login`: Login an existing user
+-   `GET /api/v1/users/getuser`: Get current loggined user details
+-   `POST /api/v1/users/logout`: Logout user
+-   `POST /api/v1/users/refresh-token`: refresh user token
+-   `POST /api/v1/users/c/:channelId`: get Subscriber count of a channel
+-   `POST /api/v1/users/delete-user`: Delete User Account
 
 ### Videos
 
--   `POST /api/videos`: Upload a new video
--   `GET /api/videos/:id`: Retrieve video details
--   `PUT /api/videos/:id`: Update video information
--   `DELETE /api/videos/:id`: Delete a video
+-   `POST /api/v1/videos/`: Upload a new video
+-   `GET /api/v1/videos/`: Retrieve all videos
+-   `GET /api/videos/:videoId`: Get a perticular video details
+-   `DELETE /api/v1/videos/:videoId`: Delete a video
 
-### Playlists
+### Subscription
 
--   `POST /api/playlists`: Create a new playlist
--   `GET /api/playlists/:id`: Get playlist details
--   `PUT /api/playlists/:id`: Update a playlist
--   `DELETE /api/playlists/:id`: Delete a playlist
+-   `POST /api/v1/subscriptions/c/:channelId`: Subscribe/Unsubscribe Channel
+-   `GET /api/v1/subscriptions/c/:channelId`: Get subscriber list of a channel
+-   `GET /api/v1/subscriptions/u/:subscriberId`: Get channel list to which user has subscribed
 
 ---
 
@@ -155,6 +158,6 @@ Here’s an overview of the main database models:
 -   **Backend**: Node.js, Express
 -   **Database**: MongoDB
 -   **Authentication**: JWT
--   **Other**: Mongoose for MongoDB ORM
+-   **Other**: Mongoose for MongoDB ORM , Cloudinary for ODM
 
 ---
