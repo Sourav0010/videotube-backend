@@ -113,7 +113,7 @@ Here’s an overview of the main database models:
 2. Install dependencies:
 
     ```bash
-    npm install
+    npm i
     ```
 
 3. Configure environment variables:
@@ -158,7 +158,16 @@ Here’s an overview of the main database models:
 -   `PATCH /api/v1/tweets/:tweetId`: Update Tweet
 -   `DELETE /api/v1/tweets/:tweetId`: Delete Tweet
 
----
+### Playlist
+
+-   `POST /api/v1/playlists/`: Create a playlist
+-   `GET /api/v1/playlists/:playlistId`: Get Playlist by ID
+-   `PATCH /api/v1/playlists/:playlistId`: Update Playlist details by ID
+-   `DELETE /api/v1/playlists/:playlistId`: Delete Playlist by ID
+-   `PATCH /api/v1/playlists/add/:videoId/:playlistId`: Add video to a playlist
+-   `PATCH /api/v1/playlists/remove/:videoId/:playlistId`: Remove a video from the playlist
+-   `GET /api/v1/playlists/user/:userId`: Get Playlists Created by user
+
 
 ## Technologies Used
 
