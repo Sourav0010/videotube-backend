@@ -15,7 +15,7 @@ const createTweet = asyncHandler(async (req, res) => {
 
     const tweet = await Tweet.create({
         content,
-        user: req.user._id,
+        owner: req.user._id,
     })
 
     if (!tweet) {
@@ -53,11 +53,20 @@ const getUserTweets = asyncHandler(async (req, res) => {
                 localField: 'owner',
                 foreignField: '_id',
                 as: 'owner',
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            avatar: 1,
+                            username: 1,
+                        },
+                    },
+                ],
             },
         },
         {
             $addFields: {
-                owner: '$owner',
+                owner: { $arrayElemAt: ['$owner', 0] },
             },
         },
     ])
@@ -68,7 +77,11 @@ const getUserTweets = asyncHandler(async (req, res) => {
 const updateTweet = asyncHandler(async (req, res) => {
     //TODO: update tweet
     const user = await User.findById(req.user._id)
-    const tweet = await Tweet.findById(req.params._id)
+    const tweet = await Tweet.findById(req.params.tweetId)
+
+    if (!tweet) {
+        throw new ApiError('Tweet not found', 404)
+    }
 
     if (tweet.owner.toString() !== user._id.toString()) {
         throw new ApiError('Unauthorized', 401)
@@ -85,17 +98,17 @@ const updateTweet = asyncHandler(async (req, res) => {
 const deleteTweet = asyncHandler(async (req, res) => {
     //TODO: delete tweet
     const user = await User.findById(req.user._id)
-    const tweet = await Tweet.findById(req.params._id)
+    const tweet = await Tweet.findById(req.params.tweetId)
 
     if (tweet.owner.toString() !== user._id.toString()) {
         throw new ApiError('Unauthorized', 401)
     }
 
-    await tweet.remove()
+    await Tweet.findByIdAndDelete(req.params.tweetId)
 
     return res
         .status(200)
-        .json(new ApiResponse(200, null, 'Tweet deleted successfully'))
+        .json(new ApiResponse(200, {}, 'Tweet deleted successfully'))
 })
 
 export { createTweet, getUserTweets, updateTweet, deleteTweet }

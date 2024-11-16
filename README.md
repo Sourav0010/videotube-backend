@@ -151,6 +151,13 @@ Here’s an overview of the main database models:
 -   `GET /api/v1/subscriptions/c/:channelId`: Get subscriber list of a channel
 -   `GET /api/v1/subscriptions/u/:subscriberId`: Get channel list to which user has subscribed
 
+### Tweet
+
+-   `POST /api/v1/tweets/`: Create Tweet
+-   `GET /api/v1/tweets/user/:userId`: Get User Tweets
+-   `PATCH /api/v1/tweets/:tweetId`: Update Tweet
+-   `DELETE /api/v1/tweets/:tweetId`: Delete Tweet
+
 ---
 
 ## Technologies Used
