@@ -168,6 +168,19 @@ Here’s an overview of the main database models:
 -   `PATCH /api/v1/playlists/remove/:videoId/:playlistId`: Remove a video from the playlist
 -   `GET /api/v1/playlists/user/:userId`: Get Playlists Created by user
 
+### Comment
+
+-   `POST /api/v1/comments/:videoId`: Create a comment
+-   `GET /api/v1/comments/:videoId`: Get all comments of a video
+-   `PATCH /api/v1/comments/c/:commentId`: Update Comment
+-   `DELETE /api/v1/comments/c/:commentId`: Delete Comment
+
+### Like
+
+-   `POST /api/v1/likes/toggle/v/:videoId`: Toggle Video Like
+-   `POST /api/v1/likes/toggle/c/:commentId`: Toggle Comment Like
+-   `POST /api/v1/likes/toggle/t/:tweetId`: Toggle Tweet Like
+-   `GET /api/v1/likes/videos`: Get All Liked Video
 
 ## Technologies Used
 

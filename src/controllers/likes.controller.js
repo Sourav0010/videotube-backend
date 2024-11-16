@@ -14,10 +14,17 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     }
 
     // Check if user has already liked the video
-    const like = await Like.findOne({ videoId, userId: req.user._id })
+    const like = await Like.findOne({ video: videoId })
 
     // If user has already liked the video, remove the like
     if (like) {
+        if (like.likedBy.toString() !== req.user._id.toString()) {
+            throw new ApiError(
+                403,
+                'You are not authorized to remove this like'
+            )
+        }
+
         await Like.findByIdAndDelete(like._id)
 
         return res
@@ -51,11 +58,17 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     // Check if user has already liked the video
     const comment = await Like.findOne({
         comment: commentId,
-        userId: req.user._id,
     })
 
     // If user has already liked the video, remove the like
     if (comment) {
+        if (comment.likedBy.toString() !== req.user._id.toString()) {
+            throw new ApiError(
+                403,
+                'You are not authorized to remove this like'
+            )
+        }
+
         await Like.findByIdAndDelete(comment._id)
 
         return res
@@ -83,10 +96,16 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 
     const tweet = await Like.findOne({
         tweet: tweetId,
-        userId: req.user._id,
     })
 
     if (tweet) {
+        if (tweet.likedBy.toString() !== req.user._id.toString()) {
+            throw new ApiError(
+                403,
+                'You are not authorized to remove this like'
+            )
+        }
+
         await Like.findByIdAndDelete(tweet._id)
 
         return res
@@ -123,9 +142,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         },
         {
             $addFields: {
-                video: {
-                    $arrayElemAt: ['$video', 0],
-                },
+                video: '$video',
             },
         },
         {
