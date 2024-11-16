@@ -3,7 +3,6 @@ import { Like } from '../models/likes.model.js'
 import { ApiError } from '../utils/ApiError.util.js'
 import { ApiResponse } from '../utils/ApiResponse.util.js'
 import { asyncHandler } from '../utils/AsyncHandler.util.js'
-import { Video } from '../models/videos.model.js'
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params
