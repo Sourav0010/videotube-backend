@@ -2,6 +2,10 @@
 
 A backend service built with Node.js, Express, and MongoDB. This project provides an API for managing users, videos, playlists, comments, likes, subscriptions, and tweets.
 
+`Mentor : Hitesh Choudhary`
+
+`Feel free to test this application and if you want to build the frontend upon it you can use this backend, Incase if you find any bug or something just rise a issue and if you want to contribute just pull a request I will be excited to merge your pull.`
+
 ## Features
 
 -   **User Management**: Allows users to register, login, manage their profile, and keep a watch history.
@@ -144,6 +148,7 @@ Here’s an overview of the main database models:
 -   `GET /api/v1/videos/`: Retrieve all videos
 -   `GET /api/videos/:videoId`: Get a perticular video details
 -   `DELETE /api/v1/videos/:videoId`: Delete a video
+-   `PATCH /api/v1/videos/toggle/publish/:videoId`: Toggle Publish Status Of A Video
 
 ### Subscription
 
@@ -190,3 +195,5 @@ Here’s an overview of the main database models:
 -   **Other**: Mongoose for MongoDB ORM , Cloudinary for ODM
 
 ---
+
+`Thanks You ~ Sourav Mohanty`
