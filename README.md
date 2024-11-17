@@ -130,6 +130,12 @@ Here’s an overview of the main database models:
     npm run dev
     ```
 
+## Base Url 
+
+```
+https://videotube-backend-vevz.onrender.com 
+```
+
 ## API Endpoints
 
 ### Users
